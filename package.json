@@ -1,0 +1,55 @@
+{
+  "name": "nodejs-golang",
+  "version": "0.0.1",
+  "description": "Module for running Golang scripts using wasm in Node.js child processes",
+  "keywords": [
+    "nodejs",
+    "golang",
+    "assemblyscript",
+    "wasm"
+  ],
+  "homepage": "https://github.com/novokhatskyioleksii/nodejs-golang#readme",
+  "bugs": {
+    "url": "https://github.com/novokhatskyioleksii/nodejs-golang/issues"
+  },
+  "license": "ISC",
+  "author": {
+    "name": "Oleksii Novokhatskyi",
+    "url": "https://github.com/novokhatskyioleksii"
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/novokhatskyioleksii/nodejs-golang.git"
+  },
+  "scripts": {
+    "preinstall": "npm run preinstall:go1.16.2:download && npm run preinstall:go1.16.2:extract && npm run preinstall:go1.16.2:clean && npm run preinstall:main:cp && npm run preinstall:wasm:build",
+    "preinstall:go1.16.2:download": "curl -O https://dl.google.com/go/go1.16.2.linux-amd64.tar.gz",
+    "preinstall:go1.16.2:extract": "tar xvf ./go1.16.2.linux-amd64.tar.gz",
+    "preinstall:go1.16.2:clean": "rm -rf ./go1.16.2.linux-amd64.tar.gz",
+    "preinstall:main:cp": "cp -n ./main.go ../../",
+    "preinstall:wasm:build": "node ./build.js",
+    "eslint": "./node_modules/.bin/eslint . --fix",
+    "prettier": "./node_modules/.bin/prettier --write ."
+  },
+  "dependencies": {
+    "@assemblyscript/loader": "^0.18.15"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.22.0",
+    "husky": "^5.1.3",
+    "prettier": "^2.2.1"
+  },
+  "engines": {
+    "node": ">=12"
+  },
+  "os": [
+    "linux"
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run prettier && npm run eslint"
+    }
+  }
+}

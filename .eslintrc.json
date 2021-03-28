@@ -1,0 +1,36 @@
+{
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
+  "globals": {
+    "Go": true
+  },
+  "rules": {
+    "max-len": ["warn", { "code": 150 }],
+    "arrow-parens": ["error", "always", { "requireForBlockBody": true }],
+    "arrow-body-style": ["error", "always"],
+    "object-curly-newline": [
+      "error",
+      {
+        "ObjectExpression": { "multiline": true, "minProperties": 3 },
+        "ImportDeclaration": { "multiline": true },
+        "ExportDeclaration": { "multiline": true },
+        "ObjectPattern": { "multiline": true }
+      }
+    ],
+    "comma-dangle": [
+      "error",
+      {
+        "arrays": "always-multiline",
+        "objects": "always-multiline",
+        "imports": "always-multiline",
+        "exports": "always-multiline",
+        "functions": "always-multiline"
+      }
+    ],
+    "linebreak-style": ["warn", "unix"],
+    "no-console": "off"
+  }
+}
