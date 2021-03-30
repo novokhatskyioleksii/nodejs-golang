@@ -1,18 +1,24 @@
 const fs = require('fs');
 const loader = require('@assemblyscript/loader');
 
+const { GO_MODULES, NODE_MODULES, MAIN_WASM } = require('./constants');
+
 require('./go/misc/wasm/wasm_exec');
 
 const go = new Go();
 
 (async () => {
   try {
-    const path = __dirname.split('/node_modules')[0];
-    if (!fs.existsSync(`${path}/main.wasm`)) {
-      throw new Error('There is no "main.wasm" file in the root the project');
+    const scriptName = process.argv[2];
+    const path = `${__dirname.split(`/${NODE_MODULES}`)[0]}/${GO_MODULES}`;
+
+    const wasmPath = scriptName ? `${path}/${scriptName}/${MAIN_WASM}` : `${path}/${MAIN_WASM}`;
+
+    if (!fs.existsSync(wasmPath)) {
+      throw new Error(`There is no "${MAIN_WASM}" file in ${wasmPath} directory`);
     }
 
-    const wasm = fs.readFileSync(`${path}/main.wasm`);
+    const wasm = fs.readFileSync(wasmPath);
     const wasmModule = loader.instantiateSync(wasm, go.importObject);
     await go.run(wasmModule.instance);
   } catch (err) {

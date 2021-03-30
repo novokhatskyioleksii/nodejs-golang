@@ -23,12 +23,13 @@
     "url": "https://github.com/novokhatskyioleksii/nodejs-golang.git"
   },
   "scripts": {
-    "preinstall": "npm run preinstall:go1.16.2:download && npm run preinstall:go1.16.2:extract && npm run preinstall:go1.16.2:clean && npm run preinstall:main:cp && npm run preinstall:mod:cp && npm run preinstall:wasm:build",
+    "preinstall": "npm run preinstall:go1.16.2:download && npm run preinstall:go1.16.2:extract && npm run preinstall:go1.16.2:clean && npm run preinstall:go_modules:create && npm run preinstall:main:cp && npm run preinstall:mod:cp && npm run preinstall:wasm:build",
     "preinstall:go1.16.2:download": "curl -O https://dl.google.com/go/go1.16.2.linux-amd64.tar.gz",
     "preinstall:go1.16.2:extract": "tar xvf ./go1.16.2.linux-amd64.tar.gz",
     "preinstall:go1.16.2:clean": "rm -rf ./go1.16.2.linux-amd64.tar.gz",
-    "preinstall:main:cp": "cp -n ./main.go ../../",
-    "preinstall:mod:cp": "cp -n ./go.mod ../../",
+    "preinstall:go_modules:create": "mkdir -p ../../go_modules",
+    "preinstall:main:cp": "cp -n ./main.go ../../go_modules",
+    "preinstall:mod:cp": "cp -n ./go.mod ../../go_modules",
     "preinstall:wasm:build": "node ./build.js",
     "eslint": "./node_modules/.bin/eslint . --fix",
     "prettier": "./node_modules/.bin/prettier --write ."

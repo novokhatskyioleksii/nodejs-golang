@@ -57,6 +57,10 @@
    const result = await run();
    ```
 
+## Multiple Golang scripts
+
+Since nodejs-golang version 0.0.4 there is possibility to create, build and run multiple golang scripts in one project.
+
 ## Support
 
 Linux only, Node.js 14+, Go 1.16.2

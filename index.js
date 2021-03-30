@@ -2,6 +2,8 @@ const fs = require('fs');
 const { exec, spawn } = require('child_process');
 const util = require('util');
 
+const { GO_MODULE_NAME, GO_MODULES, NODE_MODULES, NODEJS_GOLANG, MAIN_GO, MAIN_WASM } = require('./constants');
+
 const execPromise = util.promisify(exec);
 
 const cyanColor = '\x1b[36m';
@@ -10,29 +12,50 @@ const yellowColor = '\x1b[33m';
 const redColor = '\x1b[31m';
 const resetColor = '\x1b[0m';
 
-const build = async () => {
+const init = async (scriptName = '') => {
   try {
-    console.log(cyanColor, 'nodejs-golang', blueColor, 'Started build', resetColor);
-    const path = __dirname.split('/node_modules')[0];
+    console.log(cyanColor, NODEJS_GOLANG, blueColor, 'Started init', resetColor);
+    const path = __dirname.split(`/${NODE_MODULES}`)[0];
 
-    if (!fs.existsSync(`${path}/main.go`)) {
-      throw new Error('There is no "main.go" file in the root the project');
-    }
+    const scriptPath = `${path}/${GO_MODULES}/${scriptName}`;
+    const modulePath = `${path}/${NODE_MODULES}/${NODEJS_GOLANG}`;
 
-    await execPromise(`cd ${path} && GOOS=js GOARCH=wasm ${path}/node_modules/nodejs-golang/go/bin/go build -o ${path}/main.wasm`);
-    console.log(cyanColor, 'nodejs-golang', blueColor, 'Finished build', resetColor);
+    await execPromise(
+      `mkdir -p ${scriptPath} && cp -n ${modulePath}/${MAIN_GO} ${scriptPath} && cp -n ${modulePath}/go.mod ${scriptPath} && ${GO_MODULE_NAME}=${scriptName} node ${modulePath}/build.js`,
+    );
+    console.log(cyanColor, NODEJS_GOLANG, blueColor, 'Finished init', resetColor);
   } catch (err) {
-    console.log(cyanColor, 'nodejs-golang', redColor, 'Error build: ', err.toString(), resetColor);
-    console.log(cyanColor, 'nodejs-golang', blueColor, 'Finished build', resetColor);
+    console.log(cyanColor, NODEJS_GOLANG, redColor, 'Error init: ', err.toString(), resetColor);
+    console.log(cyanColor, NODEJS_GOLANG, blueColor, 'Finished init', resetColor);
   }
 };
 
-const run = () => {
-  return new Promise((resolve, reject) => {
-    console.log(cyanColor, 'nodejs-golang', blueColor, 'Started script', resetColor);
-    const path = __dirname.split('node_modules')[0];
+const build = async (scriptName = '') => {
+  try {
+    console.log(cyanColor, NODEJS_GOLANG, blueColor, 'Started build', resetColor);
+    const path = __dirname.split(`/${NODE_MODULES}`)[0];
 
-    const childProcess = spawn('node', [`${path}/node_modules/nodejs-golang/main.js`]);
+    const scriptPath = `${path}/${GO_MODULES}/${scriptName}`;
+    const modulePath = `${path}/${NODE_MODULES}/${NODEJS_GOLANG}`;
+
+    if (!fs.existsSync(`${scriptPath}/${MAIN_GO}`)) {
+      throw new Error(`There is no "${MAIN_GO}" file in ${scriptPath} directory`);
+    }
+
+    await execPromise(`cd ${scriptPath} && GOOS=js GOARCH=wasm ${modulePath}/go/bin/go build -o ${scriptPath}/${MAIN_WASM}`);
+    console.log(cyanColor, NODEJS_GOLANG, blueColor, 'Finished build', resetColor);
+  } catch (err) {
+    console.log(cyanColor, NODEJS_GOLANG, redColor, 'Error build: ', err.toString(), resetColor);
+    console.log(cyanColor, NODEJS_GOLANG, blueColor, 'Finished build', resetColor);
+  }
+};
+
+const run = (scriptName = '') => {
+  return new Promise((resolve, reject) => {
+    console.log(cyanColor, NODEJS_GOLANG, blueColor, 'Started script', resetColor);
+    const path = __dirname.split(`/${NODE_MODULES}`)[0];
+
+    const childProcess = spawn('node', [`${path}/${NODE_MODULES}/${NODEJS_GOLANG}/main.js`, scriptName]);
 
     let result = '';
     let error = '';
@@ -43,15 +66,15 @@ const run = () => {
 
     childProcess.stderr.on('data', (err) => {
       error = err.toString();
-      console.log(cyanColor, 'nodejs-golang', redColor, 'Error script: ', err.toString(), resetColor);
-      console.log(cyanColor, 'nodejs-golang', blueColor, 'Finished script', resetColor);
-      reject();
+      console.log(cyanColor, NODEJS_GOLANG, redColor, 'Error script: ', err.toString(), resetColor);
+      console.log(cyanColor, NODEJS_GOLANG, blueColor, 'Finished script', resetColor);
+      reject(new Error(error));
     });
 
     childProcess.stdout.on('close', () => {
       if (!error) {
-        console.log(cyanColor, 'nodejs-golang', yellowColor, 'Data: ', result, resetColor);
-        console.log(cyanColor, 'nodejs-golang', blueColor, 'Finished script', resetColor);
+        console.log(cyanColor, NODEJS_GOLANG, yellowColor, 'Data: ', result, resetColor);
+        console.log(cyanColor, NODEJS_GOLANG, blueColor, 'Finished script', resetColor);
         resolve(result);
       }
     });
@@ -59,6 +82,7 @@ const run = () => {
 };
 
 module.exports = {
+  init,
   build,
   run,
 };
