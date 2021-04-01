@@ -1,6 +1,6 @@
 {
   "name": "nodejs-golang",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Module for running Golang scripts using wasm in Node.js child processes",
   "keywords": [
     "nodejs",
