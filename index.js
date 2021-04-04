@@ -1,5 +1,6 @@
 const fs = require('fs');
 const { exec, spawn } = require('child_process');
+const loader = require('@assemblyscript/loader');
 const util = require('util');
 
 const { GO_MODULE_NAME, GO_MODULES, NODE_MODULES, NODEJS_GOLANG, MAIN_GO, MAIN_WASM } = require('./constants');
@@ -55,7 +56,9 @@ const run = (scriptName = '') => {
     console.log(cyanColor, NODEJS_GOLANG, blueColor, 'Started script', resetColor);
     const path = __dirname.split(`/${NODE_MODULES}`)[0];
 
-    const childProcess = spawn('node', [`${path}/${NODE_MODULES}/${NODEJS_GOLANG}/main.js`, scriptName]);
+    const modulePath = `${path}/${NODE_MODULES}/${NODEJS_GOLANG}`;
+
+    const childProcess = spawn('node', [`${modulePath}/instantiate.js`, scriptName]);
 
     let result = '';
     let error = '';
@@ -81,8 +84,31 @@ const run = (scriptName = '') => {
   });
 };
 
+const instantiate = async (scriptName = '') => {
+  try {
+    require('./go/misc/wasm/wasm_exec');
+
+    const go = new Go();
+
+    const path = `${__dirname.split(`/${NODE_MODULES}`)[0]}/${GO_MODULES}`;
+
+    const wasmPath = scriptName ? `${path}/${scriptName}/${MAIN_WASM}` : `${path}/${MAIN_WASM}`;
+
+    if (!fs.existsSync(wasmPath)) {
+      throw new Error(`There is no "${MAIN_WASM}" file in ${wasmPath} directory`);
+    }
+
+    const wasm = fs.readFileSync(wasmPath);
+    const wasmModule = await loader.instantiateStreaming(wasm, go.importObject);
+    go.run(wasmModule.instance);
+  } catch (err) {
+    console.log(cyanColor, NODEJS_GOLANG, redColor, 'Error instantiate: ', err.message, resetColor);
+  }
+};
+
 module.exports = {
   init,
   build,
   run,
+  instantiate,
 };
